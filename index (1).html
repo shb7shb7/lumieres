@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lumières — Bougies artisanales</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── Nav ── */
+    .nav { position: sticky; top: 0; z-index: 100; background: var(--cream); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 64px; }
+    .logo { font-family: var(--font-display); font-size: 26px; font-weight: 300; letter-spacing: 2px; color: var(--ink); }
+    .logo em { font-style: italic; color: var(--warm); }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-a { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); text-decoration: none; cursor: pointer; transition: color .2s; padding-bottom: 2px; border-bottom: 1px solid transparent; }
+    .nav-a:hover, .nav-a.active { color: var(--ink); border-bottom-color: var(--warm); }
+    .cart-trigger { position: relative; cursor: pointer; background: none; border: 1px solid var(--border-strong); padding: 8px 16px; border-radius: var(--radius); font-family: var(--font-body); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); transition: all .2s; }
+    .cart-trigger:hover { border-color: var(--warm); color: var(--warm); }
+    .cart-badge { position: absolute; top: -6px; right: -6px; background: var(--warm); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+
+    /* ── Hero ── */
+    .hero { background: var(--cream-dark); padding: 72px 32px 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; max-width: 1100px; margin: 0 auto; }
+    .hero-text h1 { font-family: var(--font-display); font-size: 52px; font-weight: 300; line-height: 1.1; margin-bottom: 20px; }
+    .hero-text h1 em { font-style: italic; color: var(--warm); }
+    .hero-text p { color: var(--ink-soft); max-width: 380px; margin-bottom: 28px; line-height: 1.8; }
+    .hero-visual { display: flex; justify-content: center; align-items: center; height: 300px; background: var(--cream); border-radius: var(--radius-lg); border: 1px solid var(--border); }
+    .hero-candle { font-size: 120px; animation: flicker 3s ease-in-out infinite; }
+    @keyframes flicker { 0%,100%{transform:scale(1) rotate(-1deg)} 25%{transform:scale(1.02) rotate(0.5deg)} 75%{transform:scale(0.98) rotate(1deg)} }
+
+    /* ── Section produits ── */
+    .section { max-width: 1100px; margin: 0 auto; padding: 48px 32px; }
+    .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 32px; }
+    .section-title { font-family: var(--font-display); font-size: 32px; font-weight: 300; }
+    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-btn { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 14px; border: 1px solid var(--border-strong); border-radius: 20px; background: none; cursor: pointer; color: var(--ink-muted); transition: all .2s; }
+    .filter-btn.active, .filter-btn:hover { background: var(--ink); color: white; border-color: var(--ink); }
+
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .product-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: transform .2s, box-shadow .2s; }
+    .product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-soft); }
+    .product-img-wrap { height: 180px; display: flex; align-items: center; justify-content: center; font-size: 72px; position: relative; }
+    .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .product-img-wrap .placeholder { font-size: 72px; }
+    .product-badge { position: absolute; top: 10px; left: 10px; }
+    .product-body { padding: 14px 16px 16px; }
+    .product-name { font-family: var(--font-display); font-size: 18px; font-weight: 400; margin-bottom: 4px; }
+    .product-desc { font-size: 12px; color: var(--ink-muted); margin-bottom: 12px; }
+    .product-footer { display: flex; align-items: center; justify-content: space-between; }
+    .product-price { font-size: 17px; font-weight: 500; color: var(--warm); }
+    .product-stock { font-size: 11px; color: var(--ink-muted); }
+
+    /* ── Cart drawer ── */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 200; opacity: 0; pointer-events: none; transition: opacity .3s; }
+    .overlay.open { opacity: 1; pointer-events: all; }
+    .cart-drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 380px; max-width: 95vw; background: var(--cream); border-left: 1px solid var(--border); z-index: 201; transform: translateX(100%); transition: transform .3s; display: flex; flex-direction: column; }
+    .cart-drawer.open { transform: translateX(0); }
+    .cart-head { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .cart-head h2 { font-family: var(--font-display); font-size: 22px; font-weight: 300; }
+    .cart-body { flex: 1; overflow-y: auto; padding: 16px 24px; }
+    .cart-empty { text-align: center; padding: 48px 0; color: var(--ink-muted); font-size: 14px; }
+    .cart-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .cart-item-emoji { font-size: 28px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--cream-dark); border-radius: var(--radius); flex-shrink: 0; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 14px; font-weight: 500; }
+    .cart-item-sub { font-size: 12px; color: var(--ink-muted); }
+    .cart-item-price { font-size: 14px; font-weight: 500; color: var(--warm); align-self: center; }
+    .qty-ctrl { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .qty-btn { width: 22px; height: 22px; border: 1px solid var(--border-strong); background: none; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+    .qty-btn:hover { background: var(--warm); border-color: var(--warm); color: white; }
+    .qty-val { font-size: 13px; min-width: 20px; text-align: center; }
+    .cart-foot { padding: 16px 24px 24px; border-top: 1px solid var(--border); }
+    .cart-total-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+    .cart-total-label { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); }
+    .cart-total-val { font-family: var(--font-display); font-size: 26px; font-weight: 400; color: var(--warm); }
+
+    /* ── Order form modal ── */
+    .modal-wrap { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.4); }
+    .modal { position: relative; background: var(--cream); border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+    .modal h2 { font-family: var(--font-display); font-size: 26px; font-weight: 300; margin-bottom: 20px; }
+    .modal-fields { display: flex; flex-direction: column; gap: 14px; }
+    .fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink-muted); }
+
+    /* ── Footer ── */
+    footer { border-top: 1px solid var(--border); padding: 32px; text-align: center; color: var(--ink-muted); font-size: 13px; margin-top: 48px; }
+    footer .logo-foot { font-family: var(--font-display); font-size: 22px; margin-bottom: 8px; }
+
+    @media (max-width: 700px) {
+      .hero { grid-template-columns: 1fr; padding: 40px 20px; }
+      .hero-visual { height: 200px; }
+      .hero-text h1 { font-size: 36px; }
+      .nav { padding: 0 16px; }
+      .nav-links { display: none; }
+      .section { padding: 32px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="logo">lumi<em>ères</em></div>
+  <div class="nav-links">
+    <a class="nav-a active" onclick="scrollTo(0,0)">Boutique</a>
+    <a class="nav-a" href="admin.html">Espace admin</a>
+  </div>
+  <button class="cart-trigger" onclick="toggleCart()">
+    Panier
+    <span class="cart-badge" id="cart-count">0</span>
+  </button>
+</nav>
+
+<!-- Hero -->
+<div style="background: var(--cream-dark)">
+  <div class="hero">
+    <div class="hero-text">
+      <h1>Des bougies qui <em>racontent</em> une histoire</h1>
+      <p>Fabriquées à la main avec des cires naturelles et des parfums soigneusement sélectionnés. Chaque bougie est unique.</p>
+      <button class="btn btn-warm" onclick="document.getElementById('catalogue').scrollIntoView({behavior:'smooth'})">
+        Découvrir la collection
+      </button>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-candle">🕯️</div>
+    </div>
+  </div>
+</div>
+
+<!-- Catalogue -->
+<div class="section" id="catalogue">
+  <div class="section-header">
+    <h2 class="section-title">La collection</h2>
+    <div class="filter-row">
+      <button class="filter-btn active" data-cat="tous" onclick="filterProducts('tous', this)">Tous</button>
+      <button class="filter-btn" data-cat="classique" onclick="filterProducts('classique', this)">Classiques</button>
+      <button class="filter-btn" data-cat="florale" onclick="filterProducts('florale', this)">Florales</button>
+      <button class="filter-btn" data-cat="boisée" onclick="filterProducts('boisée', this)">Boisées</button>
+      <button class="filter-btn" data-cat="gourmande" onclick="filterProducts('gourmande', this)">Gourmandes</button>
+      <button class="filter-btn" data-cat="fraîche" onclick="filterProducts('fraîche', this)">Fraîches</button>
+    </div>
+  </div>
+  <div class="products-grid" id="products-grid">
+    <div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--ink-muted);">Chargement des produits…</div>
+  </div>
+</div>
+
+<!-- Cart drawer -->
+<div class="overlay" id="overlay" onclick="toggleCart()"></div>
+<aside class="cart-drawer" id="cart-drawer">
+  <div class="cart-head">
+    <h2>Mon panier</h2>
+    <button class="btn-ghost" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-body" id="cart-body">
+    <div class="cart-empty">Votre panier est vide</div>
+  </div>
+  <div class="cart-foot">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-val" id="cart-total">0,00 €</span>
+    </div>
+    <button class="btn btn-warm btn-full" onclick="openOrderModal()">Commander →</button>
+  </div>
+</aside>
+
+<!-- Order modal -->
+<div class="modal-wrap hidden" id="order-modal">
+  <div class="modal-bg" onclick="closeOrderModal()"></div>
+  <div class="modal">
+    <button class="modal-close" onclick="closeOrderModal()">✕</button>
+    <h2>Votre commande</h2>
+    <div class="modal-fields">
+      <div class="fields-row">
+        <div class="field"><label>Prénom & nom</label><input id="o-name" type="text" placeholder="Marie Dupont" /></div>
+        <div class="field"><label>Téléphone</label><input id="o-phone" type="tel" placeholder="06 12 34 56 78" /></div>
+      </div>
+      <div class="field"><label>Email</label><input id="o-email" type="email" placeholder="marie@exemple.fr" /></div>
+      <div class="field"><label>Produit</label><select id="o-product"></select></div>
+      <div class="field"><label>Quantité</label><input id="o-qty" type="number" value="1" min="1" /></div>
+      <div class="field"><label>Message (optionnel)</label><textarea id="o-message" placeholder="Emballage cadeau, livraison, précisions…"></textarea></div>
+    </div>
+    <button class="btn btn-warm btn-full" style="margin-top:20px" onclick="submitOrder()">Envoyer la commande</button>
+  </div>
+</div>
+
+<footer>
+  <div class="logo-foot">lumières</div>
+  <p>Bougies artisanales faites avec amour · <a href="admin.html" style="color:var(--ink-muted)">Espace admin</a></p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/api.js"></script>
+<script>
+  const EMOJIS = { classique: '🕯️', florale: '🌸', boisée: '🌲', gourmande: '🍮', fraîche: '🌊' };
+  const BG = { classique: '#FFF8F0', florale: '#FFF0F3', boisée: '#F0F8F0', gourmande: '#FFF5E6', fraîche: '#F0F5FF' };
+  let allProducts = [];
+  let cart = JSON.parse(localStorage.getItem('lum_cart') || '[]');
+
+  function saveCart() { localStorage.setItem('lum_cart', JSON.stringify(cart)); }
+
+  function toast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast ' + type + ' show';
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  async function loadProducts() {
+    try {
+      allProducts = await getProducts();
+      renderProducts(allProducts);
+      populateOrderSelect(allProducts);
+    } catch (e) {
+      document.getElementById('products-grid').innerHTML =
+        '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-muted)">Impossible de charger les produits. Vérifiez que le serveur est en ligne.</div>';
+    }
+  }
+
+  function renderProducts(list) {
+    const grid = document.getElementById('products-grid');
+    if (!list.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-muted)">Aucun produit dans cette catégorie.</div>'; return; }
+    grid.innerHTML = list.map(p => `
+      <div class="product-card">
+        <div class="product-img-wrap" style="background:${BG[p.category] || '#FAF6F1'}">
+          ${p.image ? `<img src="${p.image}" alt="${p.name}" />` : `<span class="placeholder">${EMOJIS[p.category] || '🕯️'}</span>`}
+          ${p.badge ? `<span class="product-badge badge badge-${p.badge}">${p.badge}</span>` : ''}
+        </div>
+        <div class="product-body">
+          <div class="product-name">${p.name}</div>
+          <div class="product-desc">${p.desc}</div>
+          <div class="product-footer">
+            <span class="product-price">${p.price.toFixed(2).replace('.', ',')} €</span>
+            <span class="product-stock">${p.stock > 0 ? p.stock + ' en stock' : '<span style="color:#A32D2D">Épuisé</span>'}</span>
+          </div>
+          <button class="btn btn-outline btn-sm btn-full" style="margin-top:10px" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>
+            ${p.stock === 0 ? 'Épuisé' : '+ Ajouter au panier'}
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function filterProducts(cat, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderProducts(cat === 'tous' ? allProducts : allProducts.filter(p => p.category === cat));
+  }
+
+  function addToCart(id) {
+    const p = allProducts.find(x => x.id === id);
+    if (!p) return;
+    const existing = cart.find(x => x.id === id);
+    if (existing) existing.qty++;
+    else cart.push({ id: p.id, name: p.name, price: p.price, category: p.category, qty: 1 });
+    saveCart(); updateCartUI();
+    toast(`${p.name} ajouté au panier`);
+  }
+
+  function changeQty(id, delta) {
+    const item = cart.find(x => x.id === id);
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) cart = cart.filter(x => x.id !== id);
+    saveCart(); updateCartUI();
+  }
+
+  function updateCartUI() {
+    const count = cart.reduce((s, i) => s + i.qty, 0);
+    document.getElementById('cart-count').textContent = count;
+    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    document.getElementById('cart-total').textContent = total.toFixed(2).replace('.', ',') + ' €';
+    const body = document.getElementById('cart-body');
+    if (!cart.length) { body.innerHTML = '<div class="cart-empty">Votre panier est vide</div>'; return; }
+    body.innerHTML = cart.map(i => `
+      <div class="cart-item">
+        <div class="cart-item-emoji">${EMOJIS[i.category] || '🕯️'}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${i.name}</div>
+          <div class="cart-item-sub">${i.price.toFixed(2).replace('.', ',')} € / unité</div>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeQty(${i.id}, -1)">−</button>
+            <span class="qty-val">${i.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${i.id}, 1)">+</button>
+          </div>
+        </div>
+        <span class="cart-item-price">${(i.price * i.qty).toFixed(2).replace('.', ',')} €</span>
+      </div>
+    `).join('');
+  }
+
+  function toggleCart() {
+    document.getElementById('cart-drawer').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  }
+
+  function populateOrderSelect(products) {
+    document.getElementById('o-product').innerHTML = products.map(p =>
+      `<option value="${p.id}">${p.name} — ${p.price.toFixed(2).replace('.', ',')} €</option>`
+    ).join('');
+  }
+
+  function openOrderModal() {
+    if (cart.length) {
+      const first = cart[0];
+      document.getElementById('o-product').value = first.id;
+      document.getElementById('o-qty').value = first.qty;
+    }
+    document.getElementById('order-modal').classList.remove('hidden');
+    document.getElementById('cart-drawer').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  }
+
+  function closeOrderModal() {
+    document.getElementById('order-modal').classList.add('hidden');
+  }
+
+  async function submitOrder() {
+    const name = document.getElementById('o-name').value.trim();
+    const email = document.getElementById('o-email').value.trim();
+    const phone = document.getElementById('o-phone').value.trim();
+    const productId = document.getElementById('o-product').value;
+    const qty = document.getElementById('o-qty').value;
+    const message = document.getElementById('o-message').value.trim();
+
+    if (!name || !email || !productId || !qty) { toast('Veuillez remplir tous les champs obligatoires.', 'error'); return; }
+
+    try {
+      await placeOrder({ client: name, email, phone, productId, qty: +qty, message });
+      cart = []; saveCart(); updateCartUI();
+      closeOrderModal();
+      toast('Commande envoyée ! Nous vous recontacterons sous 24h. 🕯️');
+      loadProducts();
+    } catch (e) {
+      toast(e.message || 'Erreur lors de la commande.', 'error');
+    }
+  }
+
+  loadProducts();
+  updateCartUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lumières — Admin</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body { background: #F5F1EC; }
+
+    /* ── Login ── */
+    .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .login-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px 36px; width: 360px; }
+    .login-logo { font-family: var(--font-display); font-size: 28px; font-weight: 300; text-align: center; margin-bottom: 28px; }
+    .login-logo em { font-style: italic; color: var(--warm); }
+    .login-sub { font-size: 12px; text-align: center; color: var(--ink-muted); margin-bottom: 24px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .login-fields { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+
+    /* ── Layout admin ── */
+    .admin-wrap { min-height: 100vh; display: grid; grid-template-columns: 220px 1fr; }
+    .sidebar { background: var(--ink); color: white; padding: 0; display: flex; flex-direction: column; }
+    .sidebar-logo { font-family: var(--font-display); font-size: 22px; font-weight: 300; padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-logo em { font-style: italic; color: var(--warm-light); }
+    .sidebar-nav { flex: 1; padding: 16px 0; }
+    .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 13px; letter-spacing: 0.05em; cursor: pointer; color: rgba(255,255,255,0.6); transition: all .2s; border-left: 3px solid transparent; }
+    .sidebar-item:hover { color: white; background: rgba(255,255,255,0.06); }
+    .sidebar-item.active { color: white; background: rgba(255,255,255,0.1); border-left-color: var(--warm-light); }
+    .sidebar-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+
+    .main { overflow-y: auto; }
+    .main-header { background: white; border-bottom: 1px solid var(--border); padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    .main-header h1 { font-size: 16px; font-weight: 500; }
+    .main-body { padding: 28px 32px; }
+
+    /* ── Stats ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
+    .stat-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 8px; }
+    .stat-val { font-family: var(--font-display); font-size: 30px; font-weight: 400; line-height: 1; }
+    .stat-sub { font-size: 11px; color: var(--warm); margin-top: 4px; }
+
+    /* ── Table ── */
+    .table-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .table-card-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .table-card-title { font-size: 14px; font-weight: 500; }
+    table { width: 100%; border-collapse: collapse; }
+    th { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); font-weight: 400; padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--border); background: #FAFAF8; }
+    td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFAF8; }
+
+    .status-pill { display: inline-block; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; cursor: pointer; }
+    .status-nouvelle { background: #EAF3DE; color: #3B6D11; }
+    .status-en_preparation { background: #FAEEDA; color: #854F0B; }
+    .status-expediee { background: #E6F1FB; color: #185FA5; }
+
+    /* ── Product form ── */
+    .product-list { display: flex; flex-direction: column; gap: 0; }
+    .prod-row { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--border); transition: background .15s; }
+    .prod-row:last-child { border-bottom: none; }
+    .prod-row:hover { background: #FAFAF8; }
+    .prod-emoji { font-size: 30px; width: 46px; text-align: center; }
+    .prod-info { flex: 1; }
+    .prod-name { font-size: 14px; font-weight: 500; }
+    .prod-meta { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+    .prod-actions { display: flex; gap: 8px; align-items: center; }
+
+    /* ── Add/edit modal ── */
+    .modal-wrap { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.4); }
+    .modal { position: relative; background: white; border-radius: var(--radius-lg); padding: 28px 32px; width: 100%; max-width: 500px; }
+    .modal h2 { font-family: var(--font-display); font-size: 24px; font-weight: 300; margin-bottom: 20px; }
+    .modal-fields { display: flex; flex-direction: column; gap: 12px; }
+    .fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-close { position: absolute; top: 14px; right: 14px; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink-muted); }
+
+    @media (max-width: 800px) {
+      .admin-wrap { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .main-body { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-page" id="login-page">
+  <div class="login-card">
+    <div class="login-logo">lumi<em>ères</em></div>
+    <div class="login-sub">Espace administrateur</div>
+    <div class="login-fields">
+      <div class="field"><label>Email</label><input id="l-email" type="email" value="admin@lumieres.fr" /></div>
+      <div class="field"><label>Mot de passe</label><input id="l-password" type="password" value="admin1234" /></div>
+    </div>
+    <div id="login-error" style="color:#A32D2D;font-size:12px;margin-bottom:12px;display:none"></div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">Se connecter</button>
+    <p style="text-align:center;margin-top:16px"><a href="index.html" style="font-size:12px;color:var(--ink-muted)">← Retour à la boutique</a></p>
+  </div>
+</div>
+
+<!-- Admin app -->
+<div class="admin-wrap hidden" id="admin-app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">lumi<em>ères</em></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-item active" onclick="adminTab('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Tableau de bord
+      </div>
+      <div class="sidebar-item" onclick="adminTab('orders')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Commandes
+      </div>
+      <div class="sidebar-item" onclick="adminTab('products')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a1 1 0 00-1 1v10a1 1 0 001 1h16a1 1 0 001-1V8a1 1 0 00-1-1zM16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        Produits
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-ghost" style="color:rgba(255,255,255,0.5);font-size:12px" onclick="doLogout()">← Déconnexion</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- Dashboard -->
+    <div id="tab-dashboard">
+      <div class="main-header"><h1>Tableau de bord</h1></div>
+      <div class="main-body">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-label">Commandes totales</div><div class="stat-val" id="stat-orders">—</div></div>
+          <div class="stat-card"><div class="stat-label">CA ce mois</div><div class="stat-val" id="stat-revenue">—</div><div class="stat-sub">en euros</div></div>
+          <div class="stat-card"><div class="stat-label">En attente</div><div class="stat-val" id="stat-pending">—</div></div>
+          <div class="stat-card"><div class="stat-label">Produits</div><div class="stat-val" id="stat-products">—</div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-card-head"><span class="table-card-title">Dernières commandes</span><a href="#" onclick="adminTab('orders')" style="font-size:12px;color:var(--warm)">Voir tout →</a></div>
+          <table><thead><tr><th>Client</th><th>Produit</th><th>Total</th><th>Statut</th><th>Date</th></tr></thead>
+          <tbody id="dash-orders"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders -->
+    <div id="tab-orders" class="hidden">
+      <div class="main-header"><h1>Commandes</h1></div>
+      <div class="main-body">
+        <div class="table-card">
+          <div class="table-card-head"><span class="table-card-title">Toutes les commandes</span></div>
+          <table><thead><tr><th>N°</th><th>Client</th><th>Email</th><th>Produit</th><th>Qté</th><th>Total</th><th>Message</th><th>Statut</th><th>Date</th></tr></thead>
+          <tbody id="full-orders"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div id="tab-products" class="hidden">
+      <div class="main-header">
+        <h1>Produits</h1>
+        <button class="btn btn-warm btn-sm" onclick="openProductModal(null)">+ Ajouter</button>
+      </div>
+      <div class="main-body">
+        <div class="table-card">
+          <div class="product-list" id="admin-products"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Product modal -->
+<div class="modal-wrap hidden" id="product-modal">
+  <div class="modal-bg" onclick="closeProductModal()"></div>
+  <div class="modal">
+    <button class="modal-close" onclick="closeProductModal()">✕</button>
+    <h2 id="product-modal-title">Nouveau produit</h2>
+    <input type="hidden" id="pm-id" />
+    <div class="modal-fields">
+      <div class="field"><label>Nom</label><input id="pm-name" type="text" placeholder="Vanille Douce" /></div>
+      <div class="fields-row">
+        <div class="field"><label>Prix (€)</label><input id="pm-price" type="number" step="0.10" placeholder="14.90" /></div>
+        <div class="field"><label>Stock</label><input id="pm-stock" type="number" placeholder="10" /></div>
+      </div>
+      <div class="fields-row">
+        <div class="field"><label>Catégorie</label>
+          <select id="pm-category">
+            <option value="classique">Classique</option>
+            <option value="florale">Florale</option>
+            <option value="boisée">Boisée</option>
+            <option value="gourmande">Gourmande</option>
+            <option value="fraîche">Fraîche</option>
+          </select>
+        </div>
+        <div class="field"><label>Badge</label>
+          <select id="pm-badge">
+            <option value="">Aucun</option>
+            <option value="bestseller">Bestseller</option>
+            <option value="nouveau">Nouveau</option>
+            <option value="promo">Promo</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Description courte</label><input id="pm-desc" type="text" placeholder="Chaleureuse & enveloppante" /></div>
+      <div class="field"><label>URL de l'image (optionnel)</label><input id="pm-image" type="url" placeholder="https://…/ma-bougie.jpg" /></div>
+    </div>
+    <button class="btn btn-warm btn-full" style="margin-top:20px" onclick="saveProduct()">Enregistrer</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/api.js"></script>
+<script>
+  const EMOJIS = { classique: '🕯️', florale: '🌸', boisée: '🌲', gourmande: '🍮', fraîche: '🌊' };
+
+  function toast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast ' + type + ' show';
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('l-email').value;
+    const password = document.getElementById('l-password').value;
+    const errEl = document.getElementById('login-error');
+    try {
+      await login(email, password);
+      document.getElementById('login-page').classList.add('hidden');
+      document.getElementById('admin-app').classList.remove('hidden');
+      loadDashboard();
+    } catch (e) {
+      errEl.textContent = e.message; errEl.style.display = 'block';
+    }
+  }
+
+  function doLogout() { logout(); }
+
+  function adminTab(tab) {
+    ['dashboard','orders','products'].forEach(t => {
+      document.getElementById('tab-'+t).classList.toggle('hidden', t !== tab);
+    });
+    document.querySelectorAll('.sidebar-item').forEach((el, i) => {
+      el.classList.toggle('active', ['dashboard','orders','products'][i] === tab);
+    });
+    if (tab === 'dashboard') loadDashboard();
+    if (tab === 'orders') loadOrders();
+    if (tab === 'products') loadAdminProducts();
+  }
+
+  const STATUS_MAP = {
+    nouvelle: { label: 'Nouvelle', next: 'en_preparation' },
+    en_preparation: { label: 'En préparation', next: 'expediee' },
+    expediee: { label: 'Expédiée', next: 'expediee' },
+  };
+  const fmtDate = d => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+
+  function orderRow(o, short = false) {
+    return `<tr>
+      ${short ? '' : `<td style="color:var(--ink-muted)">#${o.id}</td>`}
+      <td style="font-weight:500">${o.client}</td>
+      ${short ? '' : `<td><a href="mailto:${o.email}" style="color:var(--warm)">${o.email}</a></td>`}
+      <td>${o.productName}</td>
+      ${short ? '' : `<td style="text-align:center">${o.qty}</td>`}
+      <td style="font-weight:500">${o.total.toFixed(2).replace('.', ',')} €</td>
+      ${short ? '' : `<td style="color:var(--ink-muted);max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.message || '—'}</td>`}
+      <td>
+        <span class="status-pill status-${o.status}" onclick="cycleStatus(${o.id}, '${o.status}')" title="Cliquer pour changer">
+          ${STATUS_MAP[o.status]?.label || o.status}
+        </span>
+      </td>
+      <td style="color:var(--ink-muted)">${fmtDate(o.createdAt)}</td>
+    </tr>`;
+  }
+
+  async function loadDashboard() {
+    try {
+      const [stats, orders] = await Promise.all([getStats(), getOrders()]);
+      document.getElementById('stat-orders').textContent = stats.totalOrders;
+      document.getElementById('stat-revenue').textContent = (+stats.monthRevenue).toFixed(2).replace('.', ',');
+      document.getElementById('stat-pending').textContent = stats.pendingOrders;
+      document.getElementById('stat-products').textContent = stats.totalProducts;
+      document.getElementById('dash-orders').innerHTML = orders.slice(0, 5).map(o => orderRow(o, true)).join('');
+    } catch (e) { toast('Erreur chargement: ' + e.message, 'error'); }
+  }
+
+  async function loadOrders() {
+    try {
+      const orders = await getOrders();
+      document.getElementById('full-orders').innerHTML = orders.map(o => orderRow(o, false)).join('');
+    } catch (e) { toast('Erreur: ' + e.message, 'error'); }
+  }
+
+  async function cycleStatus(id, current) {
+    const next = STATUS_MAP[current]?.next;
+    if (!next || next === current) return;
+    try {
+      await updateOrderStatus(id, next);
+      await loadOrders();
+      await loadDashboard();
+      toast('Statut mis à jour');
+    } catch (e) { toast(e.message, 'error'); }
+  }
+
+  async function loadAdminProducts() {
+    try {
+      const products = await getProducts();
+      document.getElementById('admin-products').innerHTML = products.map(p => `
+        <div class="prod-row">
+          <div class="prod-emoji">${p.image ? `<img src="${p.image}" style="width:40px;height:40px;object-fit:cover;border-radius:2px" alt="">` : EMOJIS[p.category] || '🕯️'}</div>
+          <div class="prod-info">
+            <div class="prod-name">${p.name} ${p.badge ? `<span class="badge badge-${p.badge}">${p.badge}</span>` : ''}</div>
+            <div class="prod-meta">${p.price.toFixed(2).replace('.', ',')} € · ${p.stock} en stock · ${p.category}</div>
+          </div>
+          <div class="prod-actions">
+            <button class="btn btn-outline btn-sm" onclick="openProductModal(${p.id})">Modifier</button>
+            <button class="btn btn-danger btn-sm" onclick="removeProduct(${p.id})">Suppr.</button>
+          </div>
+        </div>
+      `).join('');
+    } catch (e) { toast('Erreur: ' + e.message, 'error'); }
+  }
+
+  let editingProductId = null;
+
+  async function openProductModal(id) {
+    editingProductId = id;
+    document.getElementById('product-modal-title').textContent = id ? 'Modifier le produit' : 'Nouveau produit';
+    if (id) {
+      const products = await getProducts();
+      const p = products.find(x => x.id === id);
+      if (p) {
+        document.getElementById('pm-id').value = p.id;
+        document.getElementById('pm-name').value = p.name;
+        document.getElementById('pm-price').value = p.price;
+        document.getElementById('pm-stock').value = p.stock;
+        document.getElementById('pm-category').value = p.category;
+        document.getElementById('pm-badge').value = p.badge || '';
+        document.getElementById('pm-desc').value = p.desc;
+        document.getElementById('pm-image').value = p.image || '';
+      }
+    } else {
+      ['pm-name','pm-price','pm-stock','pm-desc','pm-image'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('pm-badge').value = '';
+      document.getElementById('pm-category').value = 'classique';
+    }
+    document.getElementById('product-modal').classList.remove('hidden');
+  }
+
+  function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
+
+  async function saveProduct() {
+    const data = {
+      name: document.getElementById('pm-name').value,
+      price: +document.getElementById('pm-price').value,
+      stock: +document.getElementById('pm-stock').value,
+      category: document.getElementById('pm-category').value,
+      badge: document.getElementById('pm-badge').value || null,
+      desc: document.getElementById('pm-desc').value,
+      image: document.getElementById('pm-image').value,
+    };
+    try {
+      if (editingProductId) await updateProduct(editingProductId, data);
+      else await createProduct(data);
+      closeProductModal();
+      await loadAdminProducts();
+      toast(editingProductId ? 'Produit mis à jour' : 'Produit ajouté');
+    } catch (e) { toast(e.message, 'error'); }
+  }
+
+  async function removeProduct(id) {
+    if (!confirm('Supprimer ce produit ?')) return;
+    try {
+      await deleteProduct(id);
+      await loadAdminProducts();
+      toast('Produit supprimé');
+    } catch (e) { toast(e.message, 'error'); }
+  }
+
+  // Auto-login si token valide
+  if (getToken()) {
+    document.getElementById('login-page').classList.add('hidden');
+    document.getElementById('admin-app').classList.remove('hidden');
+    loadDashboard();
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: lumieres-api
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: admin@lumieres.fr
+      - key: ADMIN_PASSWORD
+        value: admin1234
+      - key: FRONTEND_URL
+        value: https://VOTRE-USERNAME.github.io
