@@ -1,6 +1,6 @@
 // ── Configuration ────────────────────────────────────────────────────────────
 // Remplacez cette URL par celle de votre service Render après déploiement
-const API_BASE = window.API_BASE || 'https://VOTRE-SERVICE.onrender.com';
+const API_BASE = window.API_BASE || 'https://lumieres.onrender.com';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function getToken() { return localStorage.getItem('lum_token'); }
