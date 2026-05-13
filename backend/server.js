@@ -12,12 +12,14 @@ app.use(express.json());
 
 // ── In-memory store (remplacer par une DB en prod) ──────────────────────────
 let products = [
-  { id: 1, name: 'Vanille Douce', price: 14.90, desc: 'Chaleureuse & enveloppante', category: 'classique', stock: 12, badge: 'bestseller', image: '' },
-  { id: 2, name: 'Lavande Provence', price: 13.50, desc: 'Apaisante, idéale pour la détente', category: 'florale', stock: 8, badge: 'nouveau', image: '' },
-  { id: 3, name: 'Forêt Boréale', price: 15.90, desc: 'Bois de cèdre & pin sylvestre', category: 'boisée', stock: 5, badge: null, image: '' },
-  { id: 4, name: 'Rose Sauvage', price: 14.90, desc: 'Florale & légèrement sucrée', category: 'florale', stock: 10, badge: 'promo', image: '' },
-  { id: 5, name: 'Caramel Beurre Salé', price: 16.50, desc: 'Gourmande & réconfortante', category: 'gourmande', stock: 7, badge: null, image: '' },
-  { id: 6, name: 'Mer Bleue', price: 13.90, desc: 'Fraîche, marine & iodée', category: 'fraîche', stock: 9, badge: 'nouveau', image: '' },
+  { id: 1, name: 'Vanille Douce', price: 14.90, desc: 'Chaleureuse & enveloppante', category: 'classique', stock: 12, badge: 'bestseller', image: 'https://images.unsplash.com/photo-1602607144451-9d2c38b09485?w=600&q=80' },
+  { id: 2, name: 'Lavande Provence', price: 13.50, desc: 'Apaisante, idéale pour la détente', category: 'florale', stock: 8, badge: 'nouveau', image: 'https://images.unsplash.com/photo-1608181831718-c9e24b3b40b8?w=600&q=80' },
+  { id: 3, name: 'Forêt Boréale', price: 15.90, desc: 'Bois de cèdre & pin sylvestre', category: 'boisée', stock: 5, badge: null, image: 'https://images.unsplash.com/photo-1636491599977-3e7c40d0a85e?w=600&q=80' },
+  { id: 4, name: 'Rose Sauvage', price: 14.90, desc: 'Florale & légèrement sucrée', category: 'florale', stock: 10, badge: 'promo', image: 'https://images.unsplash.com/photo-1599305090598-fe179d501227?w=600&q=80' },
+  { id: 5, name: 'Caramel Beurre Salé', price: 16.50, desc: 'Gourmande & réconfortante', category: 'gourmande', stock: 7, badge: null, image: 'https://images.unsplash.com/photo-1603905890679-6a8e4e57a6e0?w=600&q=80' },
+  { id: 6, name: 'Mer Bleue', price: 13.90, desc: 'Fraîche, marine & iodée', category: 'fraîche', stock: 9, badge: 'nouveau', image: 'https://images.unsplash.com/photo-1570654621852-9dd25b76ae8c?w=600&q=80' },
+  { id: 7, name: 'Ambre & Musc', price: 17.90, desc: 'Sensuelle, profonde & boisée', category: 'classique', stock: 6, badge: null, image: 'https://images.unsplash.com/photo-1543173809-a8c1b3c24a4b?w=600&q=80' },
+  { id: 8, name: 'Fleur d\'Oranger', price: 14.50, desc: 'Délicate, lumineuse & solaire', category: 'florale', stock: 11, badge: 'bestseller', image: 'https://images.unsplash.com/photo-1591085686350-798c0f9faa7f?w=600&q=80' },
 ];
 
 let orders = [
